@@ -93,8 +93,6 @@ func main() {
 
 	b, err := ioutil.ReadFile("client_secret.json")
 
-	fmt.Println(b)
-
 	if err != nil {
 		log.Fatalf("Unable to read credential file")
 	}
@@ -112,17 +110,19 @@ func main() {
 	}
 
 	user := "me"
-	r, err := srv.Users.Labels.List(user).Do()
+	r, err := srv.Users.Labels.Get(user, "SENT").Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve labels. %v", err)
 	}
 
-	if len(r.Labels) > 0 {
-		fmt.Print("Labels:\n")
-		for _, l := range r.Labels {
-			fmt.Printf("- %s\n", l.Name)
-		}
-	} else {
-		fmt.Print("No labels found.")
-	}
+	fmt.Println(r.MessagesTotal)
+
+	// if len(r.Labels) > 0 {
+	// 	fmt.Print("Labels:\n")
+	// 	for _, l := range r.Labels {
+	// 		fmt.Printf("- %s\n", l.Name)
+	// 	}
+	// } else {
+	// 	fmt.Print("No labels found.")
+	// }
 }
