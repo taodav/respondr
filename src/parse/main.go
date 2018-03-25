@@ -110,19 +110,26 @@ func main() {
 	}
 
 	user := "me"
-	r, err := srv.Users.Labels.Get(user, "SENT").Do()
+	// r, err := srv.Users.Labels.List(user).Do()
+	// r, err := srv.Users.Messages.List(user).LabelIds("INBOX").Do()
+	r, err := srv.Users.Threads.List(user).Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve labels. %v", err)
 	}
 
-	fmt.Println(r.MessagesTotal)
-
-	// if len(r.Labels) > 0 {
-	// 	fmt.Print("Labels:\n")
-	// 	for _, l := range r.Labels {
-	// 		fmt.Printf("- %s\n", l.Name)
-	// 	}
-	// } else {
-	// 	fmt.Print("No labels found.")
-	// }
+	if len(r.Threads) > 0 {
+		for i, t := range r.Threads {
+			thread, _ := srv.Users.Threads.Get(user, t.Id).Do()
+			if len(thread.Messages) > 1 {
+				msg, err := srv.Users.Messages.Get(user, thread.Messages[0].Id).Do()
+				if err != nil {
+					log.Fatalf("Unable to retrieve message, %v", err)
+				}
+				fmt.Printf("%d: ", i)
+				fmt.Println(msg.Snippet)
+			}
+		}
+	} else {
+		fmt.Print("No messages.")
+	}
 }

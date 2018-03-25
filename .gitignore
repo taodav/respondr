@@ -104,3 +104,4 @@ ENV/
 *.exe
 
 creds.json
+client_secret.json
