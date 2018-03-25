@@ -88,6 +88,19 @@ func saveToken(file string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
+func getMessages(thread Thread, srv Service) {
+	if len(thread.Messages) > 1 {
+		for i, m := range thread.Messages {
+			msg, err := srv.Users.Messages.Get(user, m.Id).Do()
+			if err != nil {
+				log.Fatalf("Unable to retrieve message, %v", err)
+			}
+			fmt.Printf("%d: ", i)
+			fmt.Println(msg.Snippet)
+		}
+	}
+}
+
 func main() {
 	ctx := context.Background()
 
@@ -117,19 +130,19 @@ func main() {
 		log.Fatalf("Unable to retrieve labels. %v", err)
 	}
 
-	if len(r.Threads) > 0 {
-		for i, t := range r.Threads {
-			thread, _ := srv.Users.Threads.Get(user, t.Id).Do()
-			if len(thread.Messages) > 1 {
-				msg, err := srv.Users.Messages.Get(user, thread.Messages[0].Id).Do()
-				if err != nil {
-					log.Fatalf("Unable to retrieve message, %v", err)
-				}
-				fmt.Printf("%d: ", i)
-				fmt.Println(msg.Snippet)
+	// look for next pageToken (there are more threads)
+	for r.NextPageToken != "" {
+		if len(r.Threads) > 0 {
+			for _, t := range r.Threads {
+				thread, _ := srv.Users.Threads.Get(user, t.Id).Do()
+
 			}
+		} else {
+			break
+			fmt.Print("No messages.")
 		}
-	} else {
-		fmt.Print("No messages.")
+		r, err := srv.Users.Threads.List(user).PageToken(r.NextPageToken).Do()
+
 	}
+
 }
